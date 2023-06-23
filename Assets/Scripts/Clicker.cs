@@ -3,8 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Net.WebSockets;
 using Unity.Burst.CompilerServices;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -256,20 +258,86 @@ public class Clicker : MonoBehaviour
                 //Debug.Log(tiger.transform.position);
                 Instantiate(Tiger_Pospath, tiger.transform.position, Quaternion.identity);
                 Tiger_Pospath.SetActive(true);
+                Tiger_Pospath.gameObject.tag = "exp";
                 //colliders = Physics2D.OverlapBox(Tiger_Pospath.GetComponent<BoxCollider2D>().bounds).Where(collider => collider.gameobjrct.tag = "path");.Where(x => x.gameObject.layer == 7);
                 //Collider2D[] objectsCollides = new Collider2D[];
+                
+            }
+            // Special note::: Both of these foreach could have been done at once, but it was bugging, and it started working after I seperated the functions. instead of consectively instantiating and querying I seperated the functions.
+            var baghchecks = GameObject.FindGameObjectsWithTag("exp");
+            var CheckMateChecker = new List<bool>();
+            foreach (var baghcheck in baghchecks)
+            {
                 List<Collider2D> objectsCollides = new List<Collider2D>();
-                Tiger_Pospath.GetComponent<Collider2D>().OverlapCollider(new ContactFilter2D()
+                baghcheck.GetComponent<Collider2D>().OverlapCollider(new ContactFilter2D()
                 {
                     useLayerMask = true,
                     layerMask = (1 << 7)
-                },objectsCollides);
-                foreach(var collider in objectsCollides)
-                {
-                    Debug.Log(collider.gameObject.name);
-                }
+                }, objectsCollides);
+                Debug.Log("the code starts from here.");
                 Debug.Log(objectsCollides.Count());
-                Debug.Log(tiger.transform.position);
+                //foreach(var objCollide in objectsCollides)
+                //{
+                //    //Debug.Log(objCollide.gameObject.name);
+                //}
+                Debug.Log(baghcheck.transform.position);
+                foreach (var yoCollision in objectsCollides)
+                {
+                    //Debug.Log("yoCollision name is " + yoCollision.name + " and  its layer is " + yoCollision.gameObject.layer + " and its position is " + yoCollision.transform.position);
+                    var Angles = yoCollision.gameObject.transform.eulerAngles;
+                    var PathMagnitude = yoCollision.GetComponent<Collider2D>().bounds.extents.magnitude;
+                    var PathOrientVector = new Vector3();
+                    PathOrientVector.x = PathMagnitude * (float)Math.Cos((Math.PI / 180) * Angles.z);
+                    PathOrientVector.y = PathMagnitude * (float)Math.Sin((Math.PI / 180) * Angles.z);
+                    PathOrientVector.z = PathMagnitude * (float)Math.Sin((Math.PI / 180) * Angles.y);
+                    var perpendicularVector = Vector3.Cross(PathOrientVector, new Vector3(0, 0, 1));
+                    var passesObjectOrNot = Physics2D.Raycast(yoCollision.transform.position, perpendicularVector, 2 ,LayerToHit);
+                    if(passesObjectOrNot.collider == null)
+                    {
+                        perpendicularVector = -perpendicularVector;
+                        passesObjectOrNot = Physics2D.Raycast(yoCollision.transform.position, perpendicularVector, 2, LayerToHit);
+                    }
+                    //Debug.Log("the initial direction of perpendicular vector. " + perpendicularVector);
+                    //Debug.Log("The pathhit orient vector is " + PathOrientVector + " and the object name is " + yoCollision.name);
+                    //Debug.Log("Passes Object or not variable value is this " + passesObjectOrNot.collider.gameObject.name);
+                    if (passesObjectOrNot.collider.gameObject.name == "Tiger(Clone)")
+                    {
+                        //Debug.Log("The position of the gameObject struck is " + passesObjectOrNot.collider.transform.position);
+                        perpendicularVector = -perpendicularVector;
+                        var surroundObj = Physics2D.RaycastAll(baghcheck.transform.position, perpendicularVector, 10, 1 << 3);
+                        //Debug.Log("The direction it is travelling " + perpendicularVector);
+                        //Debug.Log("Position from which ray is shot "+ baghcheck.transform.position);
+                        // var gottis_surround = Physics2D.RaycastAll(baghcheck.transform.position, perpendicularVector, (Vector3.Distance(baghcheck.transform.position, surroundObj2.transform.position)+ (float)0.5), 1 << 6);
+                        //Debug.Log("SurroundObj data all the objects " + surroundObj.Count());
+                        //foreach(var surround in surroundObj)
+                        //{
+                        //    Debug.Log(surround.collider.gameObject.name + " position is " + surround.collider.transform.position);
+                        //}
+                        var distance = Vector3.Distance(baghcheck.transform.position, surroundObj[2].transform.position);
+                        var gottis_surround = Physics2D.RaycastAll(baghcheck.transform.position, perpendicularVector, distance, 1 << 6);
+                        
+                        //Debug.Log("This is the distance " + distance);
+                        if (gottis_surround.Count() == 2)
+                        {
+                            Debug.Log("It is surrounded in this direction");
+                        }
+                        else if (gottis_surround.Count() > 2)
+                        {
+                            Debug.Log("There might be some error");
+                        }
+                        else 
+                        {
+                            Debug.Log("Nah not surrounded");
+                            Debug.Log(gottis_surround.Count());
+                            foreach(var check in gottis_surround)
+                            {
+                                Debug.Log(check.collider.gameObject.name);
+                            }
+                        }
+                        Debug.Log("Wallahi");
+                    }
+                }
+                Debug.Log("End");
             }
             Debug.Log("Another run");
             goatTurnPre = goatTurn;

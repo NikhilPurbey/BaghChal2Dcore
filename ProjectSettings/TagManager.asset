@@ -10,16 +10,17 @@ TagManager:
   - MaxDiag
   - KillerDiag
   - Tiger
+  - exp
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - validPositions
   - Water
   - UI
   - Gotti
   - Path
-  - 
+  - TopLayer
   - 
   - 
   - 
