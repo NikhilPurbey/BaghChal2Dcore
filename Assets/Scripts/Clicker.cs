@@ -276,10 +276,6 @@ public class Clicker : MonoBehaviour
                 }, objectsCollides);
                 Debug.Log("the code starts from here.");
                 Debug.Log(objectsCollides.Count());
-                //foreach(var objCollide in objectsCollides)
-                //{
-                //    //Debug.Log(objCollide.gameObject.name);
-                //}
                 Debug.Log(baghcheck.transform.position);
                 foreach (var yoCollision in objectsCollides)
                 {
@@ -313,8 +309,18 @@ public class Clicker : MonoBehaviour
                         //{
                         //    Debug.Log(surround.collider.gameObject.name + " position is " + surround.collider.transform.position);
                         //}
-                        var distance = Vector3.Distance(baghcheck.transform.position, surroundObj[2].transform.position);
-                        var gottis_surround = Physics2D.RaycastAll(baghcheck.transform.position, perpendicularVector, distance, 1 << 6);
+                        float distance;
+                        RaycastHit2D[] gottis_surround;
+                        if (surroundObj.Count() == 2)
+                        {
+                             distance = Vector3.Distance(baghcheck.transform.position, surroundObj[1].transform.position);
+                             gottis_surround = Physics2D.RaycastAll(baghcheck.transform.position, perpendicularVector, distance, 1 << 6);
+                        }
+                        else
+                        {
+                             distance = Vector3.Distance(baghcheck.transform.position, surroundObj[2].transform.position);
+                             gottis_surround = Physics2D.RaycastAll(baghcheck.transform.position, perpendicularVector, distance, 1 << 6);
+                        }
                         
                         //Debug.Log("This is the distance " + distance);
                         if (gottis_surround.Count() == 2)
