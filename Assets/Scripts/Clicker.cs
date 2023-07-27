@@ -8,6 +8,7 @@ using Unity.Burst.CompilerServices;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
 
 public class Clicker : MonoBehaviour
